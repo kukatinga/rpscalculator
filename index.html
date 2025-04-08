@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RPS Calculator - Advanced Rock Paper Scissors Calculator</title>
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --secondary: #a29bfe;
+            --accent: #fd79a8;
+            --dark: #2d3436;
+            --light: #f5f6fa;
+            --success: #00b894;
+            --warning: #fdcb6e;
+            --danger: #d63031;
+        }
+        
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--light);
+            color: var(--dark);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            color: var(--primary);
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .subtitle {
+            color: var(--dark);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 30px;
+            width: 100%;
+            max-width: 1200px;
+        }
+        
+        .panel {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            padding: 25px;
+            width: 100%;
+            max-width: 500px;
+        }
+        
+        .input-panel {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .move-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin: 20px 0;
+            gap: 10px;
+        }
+        
+        .move-btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .move-btn:hover {
+            transform: translateY(-3px);
+        }
+        
+        .move-btn.rock {
+            background-color: #ff7675;
+            color: white;
+        }
+        
+        .move-btn.paper {
+            background-color: #74b9ff;
+            color: white;
+        }
+        
+        .move-btn.scissors {
+            background-color: #55efc4;
+            color: white;
+        }
+        
+        .move-btn i {
+            font-size: 2rem;
+            margin-bottom: 5px;
+        }
+        
+        .stats-panel {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .stat-card {
+            background: var(--light);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--dark);
+            opacity: 0.8;
+        }
+        
+        .chart-container {
+            height: 200px;
+            margin: 20px 0;
+            position: relative;
+        }
+        
+        .recommendation {
+            background: var(--primary);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            text-align: center;
+            font-size: 1.2rem;
+        }
+        
+        .recommendation strong {
+            font-size: 1.5rem;
+            display: block;
+            margin-bottom: 10px;
+        }
+        
+        .history {
+            margin-top: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .history-item:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        
+        .history-you, .history-opponent {
+            font-weight: bold;
+        }
+        
+        .history-you.rock { color: #ff7675; }
+        .history-you.paper { color: #74b9ff; }
+        .history-you.scissors { color: #55efc4; }
+        
+        .history-opponent.rock { color: #ff7675; }
+        .history-opponent.paper { color: #74b9ff; }
+        .history-opponent.scissors { color: #55efc4; }
+        
+        .history-result.win { color: var(--success); }
+        .history-result.lose { color: var(--danger); }
+        .history-result.tie { color: var(--warning); }
+        
+        .reset-btn {
+            background: var(--danger);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .panel {
+                width: 100%;
+            }
+            
+            .move-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <header>
+        <h1>RPS Master</h1>
+        <p class="subtitle">Advanced Rock Paper Scissors Strategy Calculator - Track opponent patterns and get winning recommendations</p>
+    </header>
+    
+    <div class="container">
+        <div class="panel input-panel">
+            <h2>Record Moves</h2>
+            <p>Select your move and your opponent's move for each round:</p>
+            
+            <div class="move-buttons">
+                <button class="move-btn rock" onclick="recordMove('rock')">
+                    <i class="fas fa-hand-rock"></i>
+                    Rock
+                </button>
+                <button class="move-btn paper" onclick="recordMove('paper')">
+                    <i class="fas fa-hand-paper"></i>
+                    Paper
+                </button>
+                <button class="move-btn scissors" onclick="recordMove('scissors')">
+                    <i class="fas fa-hand-scissors"></i>
+                    Scissors
+                </button>
+            </div>
+            
+            <div class="move-buttons">
+                <button class="move-btn rock" onclick="recordOpponentMove('rock')">
+                    <i class="fas fa-hand-rock"></i>
+                    Opponent: Rock
+                </button>
+                <button class="move-btn paper" onclick="recordOpponentMove('paper')">
+                    <i class="fas fa-hand-paper"></i>
+                    Opponent: Paper
+                </button>
+                <button class="move-btn scissors" onclick="recordOpponentMove('scissors')">
+                    <i class="fas fa-hand-scissors"></i>
+                    Opponent: Scissors
+                </button>
+            </div>
+            
+            <button class="reset-btn" onclick="resetGame()">
+                <i class="fas fa-redo"></i> Reset Game
+            </button>
+        </div>
+        
+        <div class="panel">
+            <h2>Strategy Analysis</h2>
+            
+            <div class="stats-panel">
+                <div class="stat-card">
+                    <div class="stat-value" id="rock-percent">0%</div>
+                    <div class="stat-label">Opponent Rock</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="paper-percent">0%</div>
+                    <div class="stat-label">Opponent Paper</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="scissors-percent">0%</div>
+                    <div class="stat-label">Opponent Scissors</div>
+                </div>
+            </div>
+            
+            <div class="chart-container">
+                <canvas id="moveChart"></canvas>
+            </div>
+            
+            <div class="recommendation" id="recommendation">
+                <strong>Start playing!</strong>
+                Record moves to get strategy recommendations
+            </div>
+            
+            <h3>Game History</h3>
+            <div class="history" id="history">
+                <!-- History items will be added here -->
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Game state
+        let gameState = {
+            rounds: [],
+            opponentMoves: {
+                rock: 0,
+                paper: 0,
+                scissors: 0
+            },
+            totalRounds: 0
+        };
+        
+        // Chart instance
+        let moveChart;
+        
+        // Initialize chart
+        function initChart() {
+            const ctx = document.getElementById('moveChart').getContext('2d');
+            moveChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Rock', 'Paper', 'Scissors'],
+                    datasets: [{
+                        label: 'Opponent Move Frequency',
+                        data: [0, 0, 0],
+                        backgroundColor: [
+                            'rgba(255, 118, 117, 0.7)',
+                            'rgba(116, 185, 255, 0.7)',
+                            'rgba(85, 239, 196, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 118, 117, 1)',
+                            'rgba(116, 185, 255, 1)',
+                            'rgba(85, 239, 196, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Record player move
+        function recordMove(move) {
+            if (gameState.rounds.length > 0 && !gameState.rounds[gameState.rounds.length - 1].opponent) {
+                alert("Please record opponent's move for the previous round first!");
+                return;
+            }
+            
+            gameState.rounds.push({
+                player: move,
+                opponent: null,
+                result: null
+            });
+            
+            updateUI();
+        }
+        
+        // Record opponent move
+        function recordOpponentMove(move) {
+            if (gameState.rounds.length === 0) {
+                alert("Please record your move first!");
+                return;
+            }
+            
+            const currentRound = gameState.rounds[gameState.rounds.length - 1];
+            
+            if (currentRound.opponent !== null) {
+                alert("This round already has an opponent move recorded!");
+                return;
+            }
+            
+            // Update opponent move
+            currentRound.opponent = move;
+            
+            // Calculate result
+            const playerMove = currentRound.player;
+            let result;
+            
+            if (playerMove === move) {
+                result = 'tie';
+            } else if (
+                (playerMove === 'rock' && move === 'scissors') ||
+                (playerMove === 'paper' && move === 'rock') ||
+                (playerMove === 'scissors' && move === 'paper')
+            ) {
+                result = 'win';
+            } else {
+                result = 'lose';
+            }
+            
+            currentRound.result = result;
+            
+            // Update opponent move statistics
+            gameState.opponentMoves[move]++;
+            gameState.totalRounds++;
+            
+            updateUI();
+        }
+        
+        // Update all UI elements
+        function updateUI() {
+            updateStats();
+            updateChart();
+            updateRecommendation();
+            updateHistory();
+        }
+        
+        // Update statistics display
+        function updateStats() {
+            const total = gameState.totalRounds || 1; // Avoid division by zero
+            
+            const rockPercent = Math.round((gameState.opponentMoves.rock / total) * 100);
+            const paperPercent = Math.round((gameState.opponentMoves.paper / total) * 100);
+            const scissorsPercent = Math.round((gameState.opponentMoves.scissors / total) * 100);
+            
+            document.getElementById('rock-percent').textContent = `${rockPercent}%`;
+            document.getElementById('paper-percent').textContent = `${paperPercent}%`;
+            document.getElementById('scissors-percent').textContent = `${scissorsPercent}%`;
+        }
+        
+        // Update the chart
+        function updateChart() {
+            const total = gameState.totalRounds || 1;
+            
+            const rockPercent = (gameState.opponentMoves.rock / total) * 100;
+            const paperPercent = (gameState.opponentMoves.paper / total) * 100;
+            const scissorsPercent = (gameState.opponentMoves.scissors / total) * 100;
+            
+            moveChart.data.datasets[0].data = [rockPercent, paperPercent, scissorsPercent];
+            moveChart.update();
+        }
+        
+        // Update strategy recommendation
+        function updateRecommendation() {
+            const recElement = document.getElementById('recommendation');
+            
+            if (gameState.totalRounds === 0) {
+                recElement.innerHTML = '<strong>Start playing!</strong>Record moves to get strategy recommendations';
+                return;
+            }
+            
+            const total = gameState.totalRounds;
+            const rockFreq = gameState.opponentMoves.rock / total;
+            const paperFreq = gameState.opponentMoves.paper / total;
+            const scissorsFreq = gameState.opponentMoves.scissors / total;
+            
+            // Calculate expected value for each possible move
+            const evRock = scissorsFreq - paperFreq;    // Rock beats scissors, loses to paper
+            const evPaper = rockFreq - scissorsFreq;    // Paper beats rock, loses to scissors
+            const evScissors = paperFreq - rockFreq;    // Scissors beat paper, loses to rock
+            
+            const evs = {
+                rock: evRock,
+                paper: evPaper,
+                scissors: evScissors
+            };
+            
+            // Find the move with highest expected value
+            let bestMove = 'rock';
+            let maxEV = evRock;
+            
+            if (evPaper > maxEV) {
+                bestMove = 'paper';
+                maxEV = evPaper;
+            }
+            
+            if (evScissors > maxEV) {
+                bestMove = 'scissors';
+                maxEV = evScissors;
+            }
+            
+            // Format recommendation
+            const moveNames = {
+                rock: 'Rock 🗿',
+                paper: 'Paper 📄',
+                scissors: 'Scissors ✂️'
+            };
+            
+            const confidence = Math.abs(maxEV * 100).toFixed(1);
+            
+            let recommendationText;
+            
+            if (Math.abs(maxEV) < 0.1) {
+                recommendationText = `Opponent is playing randomly. Stick to balanced play (33% each).`;
+            } else {
+                recommendationText = `Play <strong>${moveNames[bestMove]}</strong> (${confidence}% confidence)`;
+                
+                if (bestMove === 'rock') {
+                    recommendationText += ` to counter their ${(scissorsFreq * 100).toFixed(1)}% Scissors`;
+                } else if (bestMove === 'paper') {
+                    recommendationText += ` to counter their ${(rockFreq * 100).toFixed(1)}% Rock`;
+                } else {
+                    recommendationText += ` to counter their ${(paperFreq * 100).toFixed(1)}% Paper`;
+                }
+            }
+            
+            recElement.innerHTML = `<strong>Recommended Move:</strong> ${recommendationText}`;
+        }
+        
+        // Update game history
+        function updateHistory() {
+            const historyElement = document.getElementById('history');
+            historyElement.innerHTML = '';
+            
+            if (gameState.rounds.length === 0) {
+                historyElement.innerHTML = '<p>No rounds recorded yet</p>';
+                return;
+            }
+            
+            gameState.rounds.forEach((round, index) => {
+                const roundElement = document.createElement('div');
+                roundElement.className = 'history-item';
+                
+                let opponentHtml = '?';
+                let resultHtml = '';
+                
+                if (round.opponent) {
+                    opponentHtml = `<span class="history-opponent ${round.opponent}">${round.opponent.charAt(0).toUpperCase() + round.opponent.slice(1)}</span>`;
+                    resultHtml = `<span class="history-result ${round.result}">${round.result.toUpperCase()}</span>`;
+                }
+                
+                roundElement.innerHTML = `
+                    <span class="round-number">#${index + 1}</span>
+                    <span class="history-you ${round.player}">You: ${round.player.charAt(0).toUpperCase() + round.player.slice(1)}</span>
+                    <span>vs</span>
+                    ${opponentHtml}
+                    ${resultHtml}
+                `;
+                
+                historyElement.appendChild(roundElement);
+            });
+        }
+        
+        // Reset game
+        function resetGame() {
+            if (confirm("Are you sure you want to reset all game data?")) {
+                gameState = {
+                    rounds: [],
+                    opponentMoves: {
+                        rock: 0,
+                        paper: 0,
+                        scissors: 0
+                    },
+                    totalRounds: 0
+                };
+                
+                updateUI();
+            }
+        }
+        
+        // Initialize the app
+        window.onload = function() {
+            initChart();
+            updateUI();
+        };
+    </script>
+</body>
+</html>
